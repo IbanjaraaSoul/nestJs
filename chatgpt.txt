@@ -1,0 +1,173 @@
+Great! Nest.js is an excellent framework for building scalable server-side applications with TypeScript. Here's a step-by-step guide to building a sample project:
+
+Project Overview
+Let's create a simple API for managing a list of tasks (CRUD operations). This project will have endpoints to create, retrieve, update, and delete tasks.
+
+Step 1: Set Up Nest.js
+First, ensure you have Node.js and npm installed on your machine. Then, follow these steps to set up Nest.js:
+
+Install Nest CLI globally:
+
+bash
+Copy code
+npm i -g @nestjs/cli
+Create a new project:
+
+bash
+Copy code
+nest new task-manager
+Choose npm or yarn as your package manager, and Nest CLI will create the project and install the dependencies.
+
+Navigate to the project directory:
+
+bash
+Copy code
+cd task-manager
+Step 2: Generate a Task Module
+Nest.js uses modules to organize your code. Let's create a module for managing tasks.
+
+Generate the Task Module:
+
+bash
+Copy code
+nest g module tasks
+Generate a Controller and Service for the Tasks Module:
+
+bash
+Copy code
+nest g controller tasks
+nest g service tasks
+Now you should have a tasks module, controller, and service.
+
+Step 3: Define the Task Model
+In tasks folder, create a task.model.ts file to define the structure of a task:
+
+typescript
+Copy code
+export class Task {
+  id: string
+  title: string
+  description: string
+  status: TaskStatus
+}
+
+export enum TaskStatus {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
+}
+Step 4: Implement Task Service
+Open the tasks.service.ts file and implement basic CRUD operations. Here’s a simple service with methods to handle tasks:
+
+typescript
+Copy code
+import { Injectable } from '@nestjs/common'
+import { Task, TaskStatus } from './task.model'
+import { v4 as uuidv4 } from 'uuid'
+
+@Injectable()
+export class TasksService {
+  private tasks: Task[] = []
+
+  getAllTasks(): Task[] {
+    return this.tasks
+  }
+
+  getTaskById(id: string): Task {
+    return this.tasks.find(task => task.id === id)
+  }
+
+  createTask(title: string, description: string): Task {
+    const task: Task = {
+      id: uuidv4(),
+      title,
+      description,
+      status: TaskStatus.OPEN,
+    }
+    this.tasks.push(task)
+    return task
+  }
+
+  deleteTask(id: string): void {
+    this.tasks = this.tasks.filter(task => task.id !== id)
+  }
+
+  updateTaskStatus(id: string, status: TaskStatus): Task {
+    const task = this.getTaskById(id)
+    task.status = status
+    return task
+  }
+}
+Step 5: Implement Task Controller
+Open tasks.controller.ts and define the API endpoints to handle task-related requests:
+
+typescript
+Copy code
+import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common'
+import { TasksService } from './tasks.service'
+import { Task, TaskStatus } from './task.model'
+
+@Controller('tasks')
+export class TasksController {
+  constructor(private tasksService: TasksService) {}
+
+  @Get()
+  getAllTasks(): Task[] {
+    return this.tasksService.getAllTasks()
+  }
+
+  @Get('/:id')
+  getTaskById(@Param('id') id: string): Task {
+    return this.tasksService.getTaskById(id)
+  }
+
+  @Post()
+  createTask(
+    @Body('title') title: string,
+    @Body('description') description: string,
+  ): Task {
+    return this.tasksService.createTask(title, description)
+  }
+
+  @Delete('/:id')
+  deleteTask(@Param('id') id: string): void {
+    return this.tasksService.deleteTask(id)
+  }
+
+  @Patch('/:id/status')
+  updateTaskStatus(
+    @Param('id') id: string,
+    @Body('status') status: TaskStatus,
+  ): Task {
+    return this.tasksService.updateTaskStatus(id, status)
+  }
+}
+Step 6: Run the Application
+You can now run the Nest.js application:
+
+bash
+Copy code
+npm run start
+Step 7: Test the API
+Use Postman or cURL to interact with the API. Here's an example of the endpoints you can use:
+
+Get all tasks: GET /tasks
+Get task by ID: GET /tasks/:id
+Create a task: POST /tasks with body:
+json
+Copy code
+{
+  "title": "Task title",
+  "description": "Task description"
+}
+Delete a task: DELETE /tasks/:id
+Update task status: PATCH /tasks/:id/status with body:
+json
+Copy code
+{
+  "status": "IN_PROGRESS"
+}
+Optional: Validation and Error Handling
+You can enhance the project by adding DTOs for request validation, using Pipes in Nest.js, and setting up error handling.
+
+Let me know if you'd like to dive deeper into any part of this project!
